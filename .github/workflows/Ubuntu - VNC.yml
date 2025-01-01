@@ -20,10 +20,6 @@ jobs:
         sudo apt install xfce4 xfce4-goodies
         sudo apt install tigervnc-standalone-server tigervnc-viewer
 
-    - name: Run some commands (VPS-like tasks)
-      run: |
-        chmod +x ~/.vnc/xstartup
-
     - name: Print system information
       run: |
         echo Username: $(uname -a)
@@ -31,4 +27,4 @@ jobs:
         
     - name: Starting Server...
       run: |
-        vncserver
+        vncserver &
