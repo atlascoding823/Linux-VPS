@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y xfce4 xfce4-goodies
-        sudo apt install -y tigervnc-standalone-server tigervnc-viewer
+        sudo apt install -y tigervnc-standalone-server tigervnc-viewer xorg dbus-x11 x11-xserver-utils
 
     - name: Configure VNC server
       run: |
@@ -37,14 +37,13 @@ jobs:
 
     - name: Start VNC server
       run: |
-        # Start the VNC server on display 1 (you can change this as needed).
-        sudo vncserver :1 -geometry 1280x1024 -depth 24
+        # Start the VNC server on display :1 with XFCE desktop
+        vncserver :1 -geometry 1280x1024 -depth 24
 
     - name: Print system information
       run: |
         echo "VNC server running on display :1"
         echo "Use VNC viewer to connect with your runner's IP and port 5901"
-        cat ~/.vnc/passwd
 
     - name: Wait for the server to finish
       run: |
