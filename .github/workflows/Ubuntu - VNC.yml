@@ -1,0 +1,37 @@
+name: Ubuntu - VNC
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  vps:
+    runs-on: ubuntu-latest  # GitHub provides hosted Ubuntu runners
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up the environment
+      run: |
+        sudo apt update
+        sudo apt install xfce4 xfce4-goodies
+        sudo apt install tigervnc-standalone-server tigervnc-viewer
+
+    - name: Run some commands (VPS-like tasks)
+      run: |
+        echo #!/bin/sh >> ~/.vnc/xstartup
+        echo "xrdb $HOME/.Xresources" >> ~/.vnc/xstartup
+        echo "startxfce4 &" >> ~/.vnc/xstartup
+        chmod +x ~/.vnc/xstartup
+
+    - name: Print system information
+      run: |
+        echo Username: $(uname -a)
+        echo Password: $(vncpasswd)
+        
+    - name: Starting Server...
+      run: |
+        vncserver
