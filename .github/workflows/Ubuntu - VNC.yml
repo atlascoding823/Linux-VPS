@@ -38,7 +38,7 @@ jobs:
     - name: Start VNC server
       run: |
         # Start the VNC server on display 1 (you can change this as needed).
-        vncserver :1 -geometry 1280x1024 -depth 24
+        sudo vncserver :1 -geometry 1280x1024 -depth 24
 
     - name: Print system information
       run: |
