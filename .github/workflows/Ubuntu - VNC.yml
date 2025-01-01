@@ -17,14 +17,33 @@ jobs:
     - name: Set up the environment
       run: |
         sudo apt update
-        sudo apt install xfce4 xfce4-goodies
-        sudo apt install tigervnc-standalone-server tigervnc-viewer
+        sudo apt install -y xfce4 xfce4-goodies
+        sudo apt install -y tigervnc-standalone-server tigervnc-viewer
+
+    - name: Configure VNC server
+      run: |
+        # Set up a VNC password for the user. We can supply it non-interactively.
+        echo "your_password_here" | vncpasswd -f > ~/.vnc/passwd
+        chmod 600 ~/.vnc/passwd
+        
+        # Set up a basic startup file for the VNC server (using XFCE).
+        mkdir -p ~/.vnc
+        echo "#!/bin/bash" > ~/.vnc/xstartup
+        echo "xrdb $HOME/.Xresources" >> ~/.vnc/xstartup
+        echo "startxfce4 &" >> ~/.vnc/xstartup
+        chmod +x ~/.vnc/xstartup
+
+    - name: Start VNC server
+      run: |
+        # Start the VNC server on display 1 (you can change this as needed).
+        vncserver :1 -geometry 1280x1024 -depth 24
 
     - name: Print system information
       run: |
-        echo Username: $(uname -a)
-        echo Password: $(vncpasswd)
-        
-    - name: Starting Server...
+        echo "VNC server running on display :1"
+        echo "Use VNC viewer to connect with your runner's IP and port 5901"
+
+    - name: Wait for the server to finish
       run: |
-        vncserver &
+        # Here you can add any additional actions or testing for the VNC server.
+        echo "VNC server is running..."
