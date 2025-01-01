@@ -58,6 +58,7 @@ jobs:
       run: |
         # Print the username and RDP password
         echo "RDP server is running..."
-        echo "Username: runner"  # This is the default GitHub runner username
-        echo "Password: 123456"  # Replace with your actual password, ideally from a secret
+        echo Hostname: $(hostname)  # Get Hostname Form Ubuntu
+        echo "Username: runner"     # This is the default GitHub runner username
+        echo "Password: 123456"     # Replace with your actual password, ideally from a secret
         echo "Use an RDP client to connect with the GitHub runner's IP and port 3389"
