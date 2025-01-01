@@ -22,22 +22,27 @@ jobs:
 
     - name: Configure VNC server
       run: |
-        # Create the .vnc directory
+        # Create necessary directories and files
         mkdir -p ~/.vnc
+        touch ~/.Xauthority
+        touch ~/.Xresources
         
         # Set up a VNC password for the user. We can supply it non-interactively.
-        echo "123456" | vncpasswd -f > ~/.vnc/passwd
+        echo "your_password_here" | vncpasswd -f > ~/.vnc/passwd
         chmod 600 ~/.vnc/passwd
         
-        # Set up a basic startup file for the VNC server (using XFCE).
+        # Create a minimal .Xresources file to avoid xrdb issues
+        echo "XTerm*faceName: Monospace" > ~/.Xresources
+        
+        # Set up a basic startup file for the VNC server (using a simple X application like xterm for testing).
         echo "#!/bin/bash" > ~/.vnc/xstartup
         echo "xrdb $HOME/.Xresources" >> ~/.vnc/xstartup
-        echo "startxfce4 &" >> ~/.vnc/xstartup
+        echo "xterm &" >> ~/.vnc/xstartup  # Use xterm to verify the server is starting properly.
         chmod +x ~/.vnc/xstartup
 
     - name: Start VNC server
       run: |
-        # Start the VNC server on display :1 with XFCE desktop
+        # Start the VNC server on display :1
         vncserver :1 -geometry 1280x1024 -depth 24
 
     - name: Print system information
@@ -45,7 +50,10 @@ jobs:
         echo "VNC server running on display :1"
         echo "Use VNC viewer to connect with your runner's IP and port 5901"
 
+    - name: Check VNC log for errors
+      run: |
+        cat ~/.vnc/*.log
+
     - name: Wait for the server to finish
       run: |
-        # Here you can add any additional actions or testing for the VNC server.
         echo "VNC server is running..."
