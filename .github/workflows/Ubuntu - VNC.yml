@@ -22,9 +22,6 @@ jobs:
 
     - name: Run some commands (VPS-like tasks)
       run: |
-        echo #!/bin/sh >> ~/.vnc/xstartup
-        echo "xrdb $HOME/.Xresources" >> ~/.vnc/xstartup
-        echo "startxfce4 &" >> ~/.vnc/xstartup
         chmod +x ~/.vnc/xstartup
 
     - name: Print system information
