@@ -22,12 +22,14 @@ jobs:
 
     - name: Configure VNC server
       run: |
+        # Create the .vnc directory
+        mkdir -p ~/.vnc
+        
         # Set up a VNC password for the user. We can supply it non-interactively.
-        echo "your_password_here" | vncpasswd -f > ~/.vnc/passwd
+        echo "123456" | vncpasswd -f > ~/.vnc/passwd
         chmod 600 ~/.vnc/passwd
         
         # Set up a basic startup file for the VNC server (using XFCE).
-        mkdir -p ~/.vnc
         echo "#!/bin/bash" > ~/.vnc/xstartup
         echo "xrdb $HOME/.Xresources" >> ~/.vnc/xstartup
         echo "startxfce4 &" >> ~/.vnc/xstartup
@@ -42,6 +44,7 @@ jobs:
       run: |
         echo "VNC server running on display :1"
         echo "Use VNC viewer to connect with your runner's IP and port 5901"
+        cat ~/.vnc/passwd
 
     - name: Wait for the server to finish
       run: |
