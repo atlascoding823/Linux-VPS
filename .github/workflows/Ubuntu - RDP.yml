@@ -33,6 +33,8 @@ jobs:
         
         # Configure XRDP to use XFCE as the default session
         echo "startxfce4" | sudo tee -a /etc/skel/.xsession
+        sudo ufw allow 3389/tcp
+        
         sudo systemctl enable xrdp
         sudo systemctl start xrdp
 
