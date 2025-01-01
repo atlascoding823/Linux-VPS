@@ -1,0 +1,59 @@
+name: Ubuntu - RDP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # GitHub provides hosted Ubuntu runners
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up the environment
+      run: |
+        sudo apt update
+        sudo apt install -y xfce4 xfce4-goodies
+        sudo apt install -y xrdp xorg dbus-x11 x11-xserver-utils
+        
+        # Install dependencies for RDP
+        sudo apt install -y xrdp
+
+    - name: Configure RDP server
+      run: |
+        # Create necessary directories and files
+        mkdir -p ~/.xsession
+        
+        # Set up the desktop environment (XFCE)
+        echo "xfce4-session" > ~/.xsession
+        
+        # Configure XRDP to use XFCE as the default session
+        echo "startxfce4" | sudo tee -a /etc/skel/.xsession
+        sudo systemctl enable xrdp
+        sudo systemctl start xrdp
+
+    - name: Start RDP server
+      run: |
+        # Start the XRDP service
+        sudo systemctl start xrdp
+        sudo systemctl enable xrdp
+        echo "RDP server is running."
+
+    - name: Print system information
+      run: |
+        echo "RDP server running on display :0"
+        echo "Use RDP client to connect with your runner's IP and port 3389"
+
+    - name: Check XRDP log for errors
+      run: |
+        # Display XRDP logs to check if there are any errors
+        sudo cat /var/log/xrdp.log
+        sudo cat /var/log/xrdp-sesman.log
+
+    - name: Wait for the server to finish
+      run: |
+        echo "RDP server is running..."
