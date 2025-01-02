@@ -19,50 +19,52 @@ jobs:
         sudo apt update
         sudo apt install -y xfce4 xfce4-goodies
         sudo apt install -y xrdp xorg dbus-x11 x11-xserver-utils
-        
-        # Install dependencies for RDP
-        sudo apt install -y xrdp
 
     - name: Configure RDP server
       run: |
-        # Ensure .xsession is not a directory (remove if it exists)
+        # Remove existing .xsession if it's a directory
         rm -rf ~/.xsession
-        
+
         # Create necessary files for session configuration
         echo "xfce4-session" > ~/.xsession
-        
-        # Configure XRDP to use XFCE as the default session
         echo "startxfce4" | sudo tee -a /etc/skel/.xsession
+
+        # Allow RDP traffic on port 3389
         sudo ufw allow 3389/tcp
-        
+
+        # Enable and start XRDP
         sudo systemctl enable xrdp
         sudo systemctl start xrdp
 
-    - name: Start RDP server
+    - name: Install ngrok
       run: |
-        # Start the XRDP service
-        sudo systemctl start xrdp
-        sudo systemctl enable xrdp
-        echo "RDP server is running."
+        wget -qO- https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip > ngrok.zip
+        unzip ngrok.zip
+        sudo mv ngrok /usr/local/bin/
 
-    - name: Print system information
+    - name: Start ngrok for RDP
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }} # Add your ngrok auth token as a secret in GitHub
       run: |
-        echo "RDP server running on display :0"
-        echo "Use RDP client to connect with your runner's IP and port 3389"
+        # Start ngrok to expose port 3389 for RDP
+        nohup ngrok tcp 3389 --authtoken $NGROK_AUTH_TOKEN &
+        sleep 10  # Allow ngrok some time to start
 
-    - name: Check XRDP log for errors
+        # Display the public ngrok URL
+        curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+
+    - name: Print connection details
       run: |
-        # Display XRDP logs to check if there are any errors
+        echo "RDP Server is ready!"
+        echo "Use the following connection details:"
+        echo "Hostname: $(hostname)"
+        echo "Local IP Address: $(hostname -I | awk '{print $1}')"
+        echo "Public ngrok URL:"
+        curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+        echo "Username: runner"
+        echo "Password: (Use the GitHub runner's default password or set one manually)"
+
+    - name: Check XRDP logs for errors
+      run: |
         sudo cat /var/log/xrdp.log
         sudo cat /var/log/xrdp-sesman.log
-
-    - name: Wait for the server to finish
-      run: |
-        # Print the username and RDP password
-        echo "RDP server is running..."
-        echo Hostname: $(hostname)       # Get Hostname Form Ubuntu
-        echo IP Address: $(hostname -i)  # Get IP Address Form Ubuntu
-        echo "Username: runner"          # This is the default GitHub runner username
-        echo "Password: 123456"          # Replace with your actual password, ideally from a secret
-        echo "Use an RDP client to connect with the GitHub runner's IP and port 3389"
-        sleep 1d
